@@ -4,6 +4,16 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses
 [Semantic Versioning](https://semver.org/).
 
+## [1.0.1] - 2026-10-26
+
+### Added
+
+- README: animated demo GIF (`demo/toast-video.gif`) shown at the top of the page, so the toasts can be previewed on GitHub and npm.
+
+### Changed
+
+- Version bumped to 1.0.1. No code or API changes.
+
 ## [1.0.0] - 2026-10-24
 
 First stable release. The public API (`ToastProvider`, `useToast`, `Toast`, `createTheme`,
