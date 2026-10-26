@@ -1,0 +1,18 @@
+# The "files" list in package.json is authoritative; this is a safety net.
+android/
+ios/
+demo/
+__tests__/
+.github/
+coverage/
+*.tgz
+App.js
+index.js
+app.json
+Gemfile
+metro.config.js
+babel.config.js
+jest.config.js
+.eslintrc.js
+.prettierrc.js
+CONTRIBUTING.md
