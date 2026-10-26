@@ -8,7 +8,18 @@ jest.mock('react-native-safe-area-context', () =>
 
 test('the demo app renders and can show a toast', async () => {
   await render(<App />);
-  await fireEvent.press(screen.getByText('Show success'));
-  await act(async () => {});
-  expect(screen.getByText('Your changes have been saved.')).toBeTruthy();
-});
+
+  await act(async () => {
+    // do not await the press: the demo handler runs a long timed sequence
+    fireEvent.press(screen.getByText('Start Toast Demo'));
+    // the first toast appears after the demo's 300 ms delay
+    await new Promise(resolve => setTimeout(resolve, 600));
+  });
+
+  expect(screen.getByText('Top toast layout')).toBeTruthy();
+
+  // stop the toast animations and the demo sequence inside act
+  await act(async () => {
+    screen.unmount();
+  });
+}, 15000);

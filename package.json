@@ -1,6 +1,6 @@
 {
   "name": "react-native-toast-message-library",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Lightweight, customizable toast notifications for React Native: queue, themes, animations, actions, swipe-to-dismiss and accessibility. Pure JavaScript, no native modules.",
   "main": "src/index.js",
   "react-native": "src/index.js",
@@ -43,6 +43,14 @@
   ],
   "license": "MIT",
   "author": "Denish Dabhi <dabhidenish57@gmail.com>",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/DenishDabhi/toast-message-library.git"
+  },
+  "bugs": {
+    "url": "https://github.com/DenishDabhi/toast-message-library/issues"
+  },
+  "homepage": "https://github.com/DenishDabhi/toast-message-library#readme",
   "publishConfig": {
     "access": "public"
   },

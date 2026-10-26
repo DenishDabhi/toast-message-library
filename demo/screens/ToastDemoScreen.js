@@ -438,7 +438,7 @@
 //   },
 // });
 
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
   StyleSheet,
   Text,
@@ -454,7 +454,25 @@ export default function ToastUltimateDemoScreen() {
   const insets = useSafeAreaInsets();
   const [isRunning, setIsRunning] = useState(false);
 
-  const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
+  const timers = useRef(new Set());
+
+  // Stop the demo (and every pending wait) when the screen unmounts
+  useEffect(() => {
+    const pending = timers.current;
+    return () => {
+      pending.forEach(clearTimeout);
+      pending.clear();
+    };
+  }, []);
+
+  const delay = ms =>
+    new Promise(resolve => {
+      const id = setTimeout(() => {
+        timers.current.delete(id);
+        resolve();
+      }, ms);
+      timers.current.add(id);
+    });
 
   const startDemo = async () => {
     if (isRunning) return;
@@ -525,19 +543,7 @@ export default function ToastUltimateDemoScreen() {
     });
     await delay(1600);
 
-    // ===== 6. ACTION TOAST (Library's action style) =====
-    // toast.show({
-    //   type: 'success',
-    //   position: 'bottom-right',
-    //   message: 'Message deleted.',
-    //   duration: 1500,
-    //   progress: true,
-    //   closeButton: true,
-    //   onAction: () => toast.info('Delete undone.', { duration: 1500 }),
-    // });
-    // await delay(1600);
-
-    // ===== 7. CUSTOM RENDER (Library's render functionality) =====
+    // ===== 6. CUSTOM RENDER (Library's render functionality) =====
     toast.show({
       type: 'custom',
       position: 'bottom-right',
@@ -554,7 +560,7 @@ export default function ToastUltimateDemoScreen() {
     });
     await delay(1600);
 
-    // ===== 8. QUEUE TEST (All positions rapid fire) =====
+    // ===== 7. QUEUE TEST (All positions rapid fire) =====
     toast.success('Center toast layout', {
       position: 'center',
       duration: 1500,
