@@ -8,9 +8,9 @@ Lightweight, customizable toast notifications for React Native.
 
 <p align="center">
   <img
-    src="https://raw.githubusercontent.com/DenishDabhi/toast-message-library/main/demo/toast-video-letest.gif"
+    src="https://raw.githubusercontent.com/DenishDabhi/toast-message-library/main/demo/toast-video.gif?v=1.0.2"
     alt="react-native-toast-message-library demo"
-    width="450"
+    width="320"
   />
 </p>
 
@@ -725,7 +725,7 @@ Layout: `src/` (the library: `manager` = queue + timers, `components`, `animatio
 
 ## Publishing
 
-Current release: **1.0.1**. Before the first publish of a new version:
+Current release: **1.0.2**. Before the first publish of a new version:
 
 ```sh
 # 1. Update CHANGELOG.md (new version heading + date) and the "version" in package.json
@@ -739,7 +739,7 @@ npm publish               # publishConfig.access is already "public"
 
 # 3. Verify, tag and push
 npm view react-native-toast-message-library version
-git tag v1.0.1 && git push origin v1.0.1
+git tag v1.0.2 && git push origin v1.0.2
 ```
 
 For every later release (semantic versioning: patch = fixes, minor = backwards-compatible features, major = breaking changes):
