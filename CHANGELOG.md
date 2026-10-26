@@ -4,6 +4,13 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses
 [Semantic Versioning](https://semver.org/).
 
+## [1.0.2] - 2026-10-26
+
+### Changed
+
+- README: updated the animated demo GIF (`demo/toast-video-letest.gif`) shown at the top of the page.
+- Version bumped to 1.0.2. No code or API changes.
+
 ## [1.0.1] - 2026-10-26
 
 ### Added
