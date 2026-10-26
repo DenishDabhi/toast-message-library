@@ -11,9 +11,9 @@ Lightweight, customizable toast notifications for React Native.
 
 <p align="center">
   <img
-    src="https://raw.githubusercontent.com/DenishDabhi/toast-message-library/main/demo/toast-video.gif"
+    src="https://raw.githubusercontent.com/DenishDabhi/toast-message-library/main/demo/toast-video-letest.gif"
     alt="react-native-toast-message-library demo"
-    width="320"
+    width="450"
   />
 </p>
 
