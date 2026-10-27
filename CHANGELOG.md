@@ -4,6 +4,14 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses
 [Semantic Versioning](https://semver.org/).
 
+## [1.0.3] - 2026-10-27
+
+### Changed
+
+- README: improved the structure, wording and clarity of the documentation.
+- package.json: updated the `keywords` so the package is easier to find in npm search.
+- Version bumped to 1.0.3. No code or API changes.
+
 ## [1.0.2] - 2026-10-26
 
 ### Changed
