@@ -36,9 +36,9 @@ function buildShadow(theme, shadow) {
   };
 }
 
-function vibrate(type) {
+function vibrate() {
   try {
-    Vibration.vibrate(type === 'error' ? [0, 30, 60, 30] : 20);
+    Vibration.vibrate([0, 30, 60, 30]);
   } catch (error) {
     // Missing VIBRATE permission on Android must never break the toast.
   }

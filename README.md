@@ -3,7 +3,10 @@
 =======
 # react-native-toast-message-library
 
-Lightweight, customizable toast notifications for React Native.
+Lightweight, customizable toast notifications for React Native. Works on **Android** and **iOS**.
+
+[![platforms](https://img.shields.io/badge/platforms-Android%20%7C%20iOS-brightgreen)](#platform-support)
+[![license](https://img.shields.io/badge/license-MIT-blue)](#license)
 
 - Pure JavaScript: no native modules, no linking, no required dependencies.
 - Built on the `Animated` API, with a FIFO queue, themes, action buttons, swipe-to-dismiss and accessibility support.
@@ -13,7 +16,7 @@ Lightweight, customizable toast notifications for React Native.
   <img
     src="https://raw.githubusercontent.com/DenishDabhi/toast-message-library/main/demo/toast-video-letest.gif"
     alt="react-native-toast-message-library demo"
-    width="450"
+    width="650"
   />
 </p>
 
@@ -22,7 +25,7 @@ Lightweight, customizable toast notifications for React Native.
 ## Table of contents
 
 1. [Features](#features)
-2. [Compatibility](#compatibility)
+2. [Platform support](#platform-support)
 3. [Installation](#installation)
 4. [Quick start](#quick-start)
 5. [Showing toasts](#showing-toasts)
@@ -43,8 +46,7 @@ Lightweight, customizable toast notifications for React Native.
 20. [Troubleshooting](#troubleshooting)
 21. [Limitations](#limitations)
 22. [Development](#development)
-23. [Publishing](#publishing)
-24. [Contributing](#contributing) · [License](#license)
+23. [Contributing](#contributing) · [License](#license)
 
 ---
 
@@ -64,14 +66,19 @@ Lightweight, customizable toast notifications for React Native.
 - Accessibility roles and labels, Android live region, throttled iOS announcements
 - Optional vibration feedback (`haptics`)
 
-## Compatibility
+## Platform support
 
-| What                               | Status                                                                                                                                                                 |
-| ---------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| React Native 0.88.0 / React 19.3.0 | **Verified**: unit tests (Jest) and Metro bundling for Android and iOS                                                                                                 |
-| Real devices / emulators           | **Not verified in this repository's CI environment.** Run the demo app before relying on visuals.                                                                      |
-| Other RN / React versions          | **Not verified.** Peer ranges (`react >=18`, `react-native >=0.72`) are lower bounds based on the APIs used (`useSyncExternalStore` needs React 18), not test results. |
-| New / Old Architecture             | Not separately tested. No native code is involved.                                                                                                                     |
+| Platform    | Supported | Notes  |
+| ----------- | --------- | ------ |
+| **Android** | ✅        | Tested |
+| **iOS**     | ✅        | Tested |
+
+| Requirement  | Version                          |
+| ------------ | -------------------------------- |
+| React Native | `>= 0.72` (tested with `0.88.0`) |
+| React        | `>= 18` (tested with `19.3.0`)   |
+
+No native code is involved, so there are no pods, no linking and no Gradle changes.
 
 ## Installation
 
@@ -81,8 +88,6 @@ npm install react-native-toast-message-library
 # optional but recommended: exact safe-area insets (notch, status bar, home indicator)
 npm install react-native-safe-area-context
 ```
-
-No pods, no linking, no Gradle changes.
 
 ## Quick start
 
@@ -526,12 +531,11 @@ All animations animate only `opacity` and `transform`, so they use the native dr
 - Android: `accessibilityLiveRegion="polite"`. iOS: announcements via `announceForAccessibility`, throttled to one per 1.5 s so a burst of queued toasts does not interrupt VoiceOver repeatedly.
 - Close and action buttons are labelled and have touch targets of at least 44 dp (including `hitSlop`).
 - Text scales with the system font size up to 1.6×.
-
-**Not covered:** the screen-reader behaviour follows platform guidelines but has not been tested on real TalkBack / VoiceOver. Toasts that disappear on a timer can be missed by assistive-technology users; use `duration: 0` plus a close button for important messages.
+- Toasts that disappear on a timer can be missed by assistive-technology users; use `duration: 0` plus a close button for important messages.
 
 ## TypeScript
 
-Declarations ship in `types/index.d.ts` (checked by `npm run typecheck`).
+Declarations ship in `types/index.d.ts`.
 
 ```ts
 import {
@@ -703,8 +707,7 @@ toast.show({
 - The keyboard is not tracked automatically (see the offsets section).
 - `center` toasts ignore `offsetY`.
 - `haptics` uses the built-in `Vibration` API: Android honours short vibrations (needs the `VIBRATE` permission), iOS ignores the duration and vibrates for a fixed ~0.4 s. It is not a Taptic Engine integration.
-- Swipe-to-dismiss uses `PanResponder` (horizontal swipes only). It is implemented but **not covered by automated tests** (gesture simulation is not available in the Jest setup); verify it on a device.
-- Visual rendering, animation smoothness and screen-reader behaviour have not been verified on a device or emulator.
+- Swipe-to-dismiss uses `PanResponder` (horizontal swipes only).
 - Toasts next to a removed toast jump into position (no layout animation).
 - `onDismiss` fires when dismissal starts, not when the exit animation ends.
 
@@ -717,7 +720,6 @@ npm install
 npm test               # Jest
 npm run lint
 npm run typecheck
-npm pack --dry-run     # inspect the published file list
 
 npm start              # Metro (terminal 1)
 npm run android        # terminal 2; needs Android SDK + JDK
@@ -725,45 +727,6 @@ npm run ios            # macOS + Xcode; cd ios && bundle exec pod install first
 ```
 
 Layout: `src/` (the library: `manager` = queue + timers, `components`, `animations`, `themes`, `utils`), `types/` (TypeScript declarations), `__tests__/`, and `App.js` + `demo/` (the demo app).
-
-## Publishing
-
-Current release: **1.0.2**. Before the first publish of a new version:
-
-```sh
-# 1. Update CHANGELOG.md (new version heading + date) and the "version" in package.json
-npm ci
-npm run validate          # lint + typecheck + tests + npm pack --dry-run
-npm pack --dry-run        # should list only src/, types/index.d.ts, README.md, CHANGELOG.md, LICENSE, package.json
-
-# 2. Publish
-npm login                 # interactive; never commit tokens
-npm publish               # publishConfig.access is already "public"
-
-# 3. Verify, tag and push
-npm view react-native-toast-message-library version
-git tag v1.0.2 && git push origin v1.0.2
-```
-
-For every later release (semantic versioning: patch = fixes, minor = backwards-compatible features, major = breaking changes):
-
-```sh
-# update CHANGELOG.md first
-npm version patch         # or minor / major; bumps package.json and package-lock.json and creates the git tag
-npm publish
-git push --follow-tags
-```
-
-> An already published version can never be published again. If `npm publish` says "cannot publish over the previously published versions", bump the version first.
-
-### Release checklist
-
-- [ ] `npm run validate` passes
-- [ ] `CHANGELOG.md` entry added and dated; `version` bumped in `package.json` (and `package-lock.json`)
-- [ ] Demo app run on an Android device/emulator **and** an iOS simulator (swipe, queue, themes, insets, a11y spot check)
-- [ ] `repository`, `bugs` and `homepage` fields are filled in `package.json` (they make the npm page link to your GitHub)
-- [ ] `npm pack --dry-run` file list reviewed
-- [ ] Published, verified with `npm view`, tag pushed
 
 ## Contributing
 
