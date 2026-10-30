@@ -1,55 +1,26 @@
 import { ANIMATIONS, POSITIONS, TOAST_TYPES } from './constants';
-
-const PREFIX = '[react-native-toast-message-library]';
-
-function fail(message) {
-  throw new TypeError(`${PREFIX} ${message}`);
-}
-
-function isPlainObject(value) {
-  return value !== null && typeof value === 'object' && !Array.isArray(value);
-}
-
-function checkFunction(options, key) {
-  if (options[key] != null && typeof options[key] !== 'function') {
-    fail(`"${key}" must be a function, received ${typeof options[key]}.`);
-  }
-}
-
-function checkEnum(options, key, allowed) {
-  if (options[key] != null && !allowed.includes(options[key])) {
-    fail(
-      `Invalid ${key} "${String(
-        options[key],
-      )}". Expected one of: ${allowed.join(', ')}.`,
-    );
-  }
-}
-
-function checkNonNegativeNumber(options, key) {
-  const value = options[key];
-  if (value == null) {
-    return;
-  }
-  if (typeof value !== 'number' || !Number.isFinite(value) || value < 0) {
-    fail(`"${key}" must be a finite number >= 0, received ${String(value)}.`);
-  }
-}
-
-function checkBoolean(options, key) {
-  if (options[key] != null && typeof options[key] !== 'boolean') {
-    fail(`"${key}" must be a boolean, received ${typeof options[key]}.`);
-  }
-}
+import {
+  checkBoolean,
+  checkEnum,
+  checkFunction,
+  checkNonNegativeNumber,
+  fail,
+  isPlainObject,
+} from './validation';
 
 /**
- * Validates an options object (after strings have been converted to objects).
- * Throws a TypeError with an actionable message on the first problem found.
+ * Validates the shape of an options object (after strings have been converted
+ * to objects). Throws a TypeError with an actionable message on the first
+ * problem found.
+ *
+ * Whether the toast would be empty is checked later, in
+ * normalizeToastOptions, because it depends on the resolved title (the
+ * per-toast title, the provider `titles` or the built-in type name).
  */
 export default function validateToastOptions(options) {
   if (!isPlainObject(options)) {
     fail(
-      'toast options must be a string or an object, e.g. toast.show({ message: "Saved" }).',
+      'toast options must be a string, a number or an object, e.g. toast.show({ message: "Saved" }).',
     );
   }
 
@@ -69,7 +40,7 @@ export default function validateToastOptions(options) {
     fail('"id" must be a string or a number.');
   }
 
-  ['title', 'message'].forEach(key => {
+  ['title', 'message', 'description'].forEach(key => {
     const value = options[key];
     if (
       value != null &&
@@ -79,6 +50,12 @@ export default function validateToastOptions(options) {
       fail(`"${key}" must be a string or number, received ${typeof value}.`);
     }
   });
+
+  if (options.message != null && options.description != null) {
+    fail(
+      'use either "message" or "description", not both. They are the same option.',
+    );
+  }
 
   ['onPress', 'onDismiss', 'onAction', 'onShow', 'render'].forEach(key =>
     checkFunction(options, key),
@@ -111,16 +88,6 @@ export default function validateToastOptions(options) {
     !isPlainObject(options.shadow)
   ) {
     fail('"shadow" must be false or an object.');
-  }
-
-  const hasContent =
-    options.message != null ||
-    (options.title != null && options.title !== '') ||
-    typeof options.render === 'function';
-  if (!hasContent) {
-    fail(
-      'a toast needs at least a "message", a "title" or a "render" function.',
-    );
   }
 
   return options;

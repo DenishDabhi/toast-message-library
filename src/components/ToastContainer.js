@@ -63,7 +63,10 @@ function toastWidth(position, windowWidth, insets, offset, extraX) {
   const limit = corner
     ? Math.min(CORNER_MAX_WIDTH, Math.round(available * CORNER_WIDTH_RATIO))
     : MAX_WIDTH;
-  return Math.max(0, Math.min(limit, available - (corner ? extraX : 0)));
+  // A per-toast offsetX moves a corner toast away from its side. A centred toast
+  // keeps equal space on both sides, so it becomes narrower on both sides.
+  const reserved = corner ? extraX : 2 * extraX;
+  return Math.max(0, Math.min(limit, available - reserved));
 }
 
 /** Margins for the per-toast `offsetX` / `offsetY` options. */

@@ -4,6 +4,45 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses
 [Semantic Versioning](https://semver.org/).
 
+## [1.0.4] - 2026-10-29
+
+This release makes the published package match its documentation. Several
+features listed under 1.0.0 (`description`, `titles`, provider prop validation,
+the empty-toast check and the `insets` fix) were documented but were missing
+from the code published as 1.0.0 to 1.0.3. They are included and tested now.
+
+### Added
+
+- `description` option: an alias of `message`. Passing both throws a `TypeError`.
+- `titles` provider prop: change, translate or hide the default title per toast type,
+  e.g. `titles={{ success: 'Done', error: '' }}`.
+- Validation of `<ToastProvider>` props (`position`, `animation`, `duration`,
+  `animationDuration`, `maxVisible`, `spacing`, `offset`, `insets`, `titles` and the boolean props).
+- Tests for the queue, timers, in-place updates, option and provider validation, rendering,
+  callbacks and safe-area insets.
+- Typings: `description`, `titles` (`ToastTitles`) and numbers as the first argument of
+  `show`, `success`, `error`, `warning` and `info`.
+- Demo app: title and description, hidden title, update in place and action button examples.
+
+### Fixed
+
+- An invalid provider `position` or `animation` made toasts "visible" but never drawn; it now throws a clear `TypeError`.
+- A toast with an empty title and an empty message rendered as an empty box; it now throws a `TypeError`.
+- `insets={{ top: undefined }}` (or any non-numeric or negative side) produced `NaN` positions; such values are now ignored.
+- Per-toast `offsetX` had no effect on centred positions (`top`, `bottom`, `center`); it now narrows the toast on both sides, as documented.
+- The progress bar did not restart when a toast was updated in place by re-using its `id`.
+- A toast that had been swiped away and was then shown again with the same `id` stayed off screen.
+- Errors thrown by `onPress` and `onAction` could skip the dismissal that should follow; they are now caught and logged like the other callbacks.
+- iOS: a toast updated in place with new text was not announced again by VoiceOver.
+- `engines.node` was still published in 1.0.0 to 1.0.3. It described the demo app's toolchain and produced install warnings for library users on older Node versions; it is removed.
+
+### Changed
+
+- README: new introduction, "Why this library" section, FAQ, npm badges and Yarn / pnpm install commands, written to be easier to find in search.
+- README: FAQ entry and troubleshooting row explaining the `transformIgnorePatterns` setting that Jest needs to import this library.
+- package.json: new `description` and an updated `keywords` list.
+- Demo app: removed unused props and fixed all lint warnings.
+
 ## [1.0.3] - 2026-10-27
 
 ### Changed

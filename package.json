@@ -1,7 +1,7 @@
 {
   "name": "react-native-toast-message-library",
-  "version": "1.0.3",
-  "description": "Lightweight, customizable toast notifications for React Native: queue, themes, animations, actions, swipe-to-dismiss and accessibility. Pure JavaScript, no native modules.",
+  "version": "1.0.4",
+  "description": "React Native toast notification library for Android and iOS: toast, snackbar, queue, light and dark themes, action buttons, swipe-to-dismiss, TypeScript and accessibility. Pure JavaScript, no native modules, works with Expo.",
   "main": "src/index.js",
   "react-native": "src/index.js",
   "types": "types/index.d.ts",
@@ -33,21 +33,26 @@
     "prepublishOnly": "npm run lint && npm run typecheck && npm test"
   },
   "keywords": [
-    "react-native-toast-message-library",
+    "react-native",
     "react-native-toast",
     "react-native-toast-message",
     "react-native-toast-notification",
-    "react-native-toast-library",
-    "react-native-notifications",
+    "react-native-snackbar",
+    "react-native-notification",
+    "react-native-toast-message-library",
+    "toast",
     "toast-message",
     "toast-notification",
     "toast-notifications",
-    "toast",
+    "toaster",
     "snackbar",
-    "react-native",
+    "notification",
+    "alert",
     "ios",
     "android",
-    "typescript"
+    "expo",
+    "typescript",
+    "animated"
   ],
   "license": "MIT",
   "author": "Denish Dabhi <dabhidenish57@gmail.com>",
@@ -93,8 +98,5 @@
     "react-native-safe-area-context": "^5.5.2",
     "test-renderer": "^1.0.0",
     "typescript": "^6.0.3"
-  },
-  "engines": {
-    "node": ">= 22.11.0"
   }
 }
