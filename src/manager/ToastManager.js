@@ -1,6 +1,7 @@
 import { DEFAULT_CONFIG } from '../utils/constants';
 import generateToastId from '../utils/generateToastId';
 import normalizeToastOptions from '../utils/normalizeToastOptions';
+import safeCall from '../utils/safeCall';
 
 /**
  * ToastManager is a framework-agnostic store. It owns:
@@ -20,22 +21,6 @@ import normalizeToastOptions from '../utils/normalizeToastOptions';
 // never reported that its exit animation finished (e.g. the view was unmounted).
 const EXIT_SAFETY_MARGIN = 400;
 
-function reportError(error) {
-  // Errors thrown by user callbacks must not corrupt the manager state.
-  console.error('[react-native-toast-message-library] Error in toast callback:', error);
-}
-
-function safeCall(fn, ...args) {
-  if (typeof fn !== 'function') {
-    return;
-  }
-  try {
-    fn(...args);
-  } catch (error) {
-    reportError(error);
-  }
-}
-
 export default class ToastManager {
   constructor(config = {}) {
     this._config = { ...DEFAULT_CONFIG, ...config };
@@ -45,6 +30,7 @@ export default class ToastManager {
     this._exitTimers = new Map();
     this._listeners = new Set();
     this._destroyed = false;
+    this._revision = 0;
     this._snapshot = Object.freeze({ toasts: [], queued: 0 });
 
     this.subscribe = this.subscribe.bind(this);
@@ -298,12 +284,16 @@ export default class ToastManager {
   }
 
   _createEntry(id, options) {
+    // `revision` changes every time the toast is created or updated in place,
+    // so views can restart things that depend on it (for example the progress bar).
+    this._revision += 1;
     return {
       id,
       options,
       status: 'visible',
       paused: false,
       remaining: options.duration,
+      revision: this._revision,
     };
   }
 

@@ -13,6 +13,7 @@ try {
 
 const FallbackContext = createContext(null);
 const InsetsContext = ExternalInsetsContext || FallbackContext;
+const SIDES = ['top', 'bottom', 'left', 'right'];
 
 function fallbackInsets() {
   if (Platform.OS === 'android') {
@@ -23,6 +24,27 @@ function fallbackInsets() {
   return { top: 47, bottom: 34, left: 0, right: 0 };
 }
 
+function isValidInset(value) {
+  return typeof value === 'number' && Number.isFinite(value) && value >= 0;
+}
+
+/**
+ * Only sides that hold a valid number are taken from `override`. Anything else
+ * (undefined, null, strings, NaN, negative numbers) is ignored, so
+ * `insets={{ top: undefined }}` cannot turn into NaN positions.
+ */
+function pickValidInsets(override) {
+  const picked = {};
+  if (override && typeof override === 'object') {
+    SIDES.forEach(side => {
+      if (isValidInset(override[side])) {
+        picked[side] = override[side];
+      }
+    });
+  }
+  return picked;
+}
+
 /**
  * Priority: explicit `override` prop > react-native-safe-area-context
  * (when installed and a SafeAreaProvider is mounted) > platform fallback.
@@ -30,5 +52,12 @@ function fallbackInsets() {
 export default function useToastInsets(override) {
   const external = useContext(InsetsContext);
   const base = external || fallbackInsets();
-  return { top: 0, bottom: 0, left: 0, right: 0, ...base, ...override };
+  return {
+    top: 0,
+    bottom: 0,
+    left: 0,
+    right: 0,
+    ...base,
+    ...pickValidInsets(override),
+  };
 }

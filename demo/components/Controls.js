@@ -89,7 +89,7 @@ export function Chips({ options, value, onChange, colors }) {
             <Text
               style={[
                 styles.chipLabel,
-                { color: selected ? '#FFFFFF' : colors.text },
+                selected ? styles.chipLabelSelected : { color: colors.text },
               ]}
             >
               {option.label}
@@ -136,6 +136,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   chipLabel: { fontSize: 13, fontWeight: '600' },
+  chipLabelSelected: { color: '#FFFFFF' },
   toggle: {
     flexDirection: 'row',
     alignItems: 'center',

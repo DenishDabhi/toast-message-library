@@ -59,9 +59,16 @@ export interface ToastOptions {
   /** Reusing an id updates that toast in place. Generated when omitted. */
   id?: string | number;
   type?: ToastType;
-  /** Defaults to "Success" / "Error" / "Warning" / "Info". Use '' or null to hide. */
+  /**
+   * Heading of the toast. Defaults to the provider's `titles[type]`, then to
+   * "Success" / "Error" / "Warning" / "Info" (no title for "custom").
+   * Use '' or null to hide it.
+   */
   title?: string | number | null;
+  /** Body text. Same option as `description`; pass only one of them. */
   message?: string | number;
+  /** Alias of `message`. Pass only one of them. */
+  description?: string | number;
   /** ms. 0 keeps the toast until dismissed. Default 3000. */
   duration?: number;
   position?: ToastPosition;
@@ -110,17 +117,16 @@ export interface ToastOptions {
   onDismiss?: (reason: ToastDismissReason, id: ToastId) => void;
 }
 
-export type ToastShortcutOptions = Omit<ToastOptions, 'type' | 'message'> & {
-  message?: ToastOptions['message'];
-};
+/** Options accepted by toast.success / error / warning / info (the type is fixed). */
+export type ToastShortcutOptions = Omit<ToastOptions, 'type'>;
 
 export interface ToastApi {
   /** Throws a TypeError on invalid options. Returns the toast id. */
-  show(options: ToastOptions | string): ToastId;
-  success(message: string | ToastShortcutOptions, options?: ToastShortcutOptions): ToastId;
-  error(message: string | ToastShortcutOptions, options?: ToastShortcutOptions): ToastId;
-  warning(message: string | ToastShortcutOptions, options?: ToastShortcutOptions): ToastId;
-  info(message: string | ToastShortcutOptions, options?: ToastShortcutOptions): ToastId;
+  show(options: ToastOptions | string | number): ToastId;
+  success(message: string | number | ToastShortcutOptions, options?: ToastShortcutOptions): ToastId;
+  error(message: string | number | ToastShortcutOptions, options?: ToastShortcutOptions): ToastId;
+  warning(message: string | number | ToastShortcutOptions, options?: ToastShortcutOptions): ToastId;
+  info(message: string | number | ToastShortcutOptions, options?: ToastShortcutOptions): ToastId;
   /** true if a toast was dismissed (visible or queued). */
   hide(id: ToastId | number): boolean;
   /** Returns how many toasts were dismissed. */
@@ -169,6 +175,9 @@ export interface Insets {
   right?: number;
 }
 
+/** Default title per toast type. Use '' to hide the title for that type. */
+export type ToastTitles = Partial<Record<ToastType, string>>;
+
 export interface ToastProviderProps {
   children?: React.ReactNode;
   /** 'system' follows the device colour scheme. Objects are merged over the light theme (or `extends`). */
@@ -183,6 +192,8 @@ export interface ToastProviderProps {
   swipeToDismiss?: boolean;
   progress?: boolean;
   haptics?: boolean;
+  /** Default title per toast type, e.g. { success: 'Done', error: '' }. Also used to translate titles. */
+  titles?: ToastTitles;
   /** Gap between stacked toasts. Defaults to the theme's spacing. */
   spacing?: number;
   offset?: { x?: number; y?: number };
