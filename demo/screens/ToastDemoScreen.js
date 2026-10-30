@@ -9,14 +9,30 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useToast } from '../../src';
 
-export default function ToastUltimateDemoScreen() {
+// The render functions below are defined outside the component so React does
+// not see a new component type on every render.
+function renderRocketIcon({ color }) {
+  return <Text style={[styles.emoji, { color }]}>🚀</Text>;
+}
+
+function renderCustomToast({ colors }) {
+  return (
+    <View style={styles.renderRow}>
+      <Text style={[styles.renderText, { color: colors.text }]}>
+        🎉 Fully custom layout bottom right
+      </Text>
+    </View>
+  );
+}
+
+export default function ToastDemoScreen() {
   const toast = useToast();
   const insets = useSafeAreaInsets();
   const [isRunning, setIsRunning] = useState(false);
 
   const timers = useRef(new Set());
 
-  // Stop the demo (and every pending wait) when the screen unmounts
+  // Stop the demo (and every pending wait) when the screen unmounts.
   useEffect(() => {
     const pending = timers.current;
     return () => {
@@ -40,7 +56,7 @@ export default function ToastUltimateDemoScreen() {
     toast.hideAll();
     await delay(300);
 
-    // ===== 1. DEFAULT SUCCESS (Library's original design) =====
+    // ===== 1. DEFAULT SUCCESS =====
     toast.success('Top toast layout', {
       position: 'top',
       duration: 1500,
@@ -76,7 +92,7 @@ export default function ToastUltimateDemoScreen() {
     });
     await delay(1600);
 
-    // ===== 5. CUSTOM TOAST (Library's design language) =====
+    // ===== 5. CUSTOM TOAST =====
     toast.show({
       type: 'custom',
       position: 'bottom-left',
@@ -94,7 +110,7 @@ export default function ToastUltimateDemoScreen() {
         offsetY: 8,
         elevation: 10,
       },
-      icon: ({ color }) => <Text style={[styles.emoji, { color }]}>🚀</Text>,
+      icon: renderRocketIcon,
       iconColor: '#C7D2FE',
       titleStyle: { letterSpacing: 0.5 },
       duration: 1500,
@@ -103,29 +119,71 @@ export default function ToastUltimateDemoScreen() {
     });
     await delay(1600);
 
-    // ===== 6. CUSTOM RENDER (Library's render functionality) =====
+    // ===== 6. CUSTOM RENDER FUNCTION =====
     toast.show({
       type: 'custom',
       position: 'bottom-right',
       duration: 1500,
       progress: true,
       closeButton: true,
-      render: ({ colors, hide }) => (
-        <View style={styles.renderRow}>
-          <Text style={[styles.renderText, { color: colors.text }]}>
-            🎉 Fully custom layout bottom right
-          </Text>
-        </View>
-      ),
+      render: renderCustomToast,
     });
     await delay(1600);
 
-    // ===== 7. QUEUE TEST (All positions rapid fire) =====
+    // ===== 7. CENTER POSITION =====
     toast.success('Center toast layout', {
       position: 'center',
       duration: 1500,
       progress: true,
       closeButton: true,
+    });
+    await delay(1600);
+
+    // ===== 8. TITLE AND DESCRIPTION =====
+    toast.success({
+      title: 'Profile saved',
+      description: 'Everyone can see your new photo.',
+      position: 'top',
+      duration: 1500,
+    });
+    await delay(1600);
+
+    // ===== 9. HIDDEN TITLE (title: '') =====
+    toast.error('Could not reach the server.', {
+      title: '',
+      position: 'bottom',
+      duration: 1500,
+    });
+    await delay(1600);
+
+    // ===== 10. UPDATE A TOAST IN PLACE (same id) =====
+    toast.show({
+      id: 'upload',
+      type: 'info',
+      title: 'Uploading',
+      description: 'Please wait...',
+      position: 'top',
+      duration: 0,
+    });
+    await delay(1200);
+    toast.show({
+      id: 'upload',
+      type: 'success',
+      title: 'Uploaded',
+      description: 'Your file is ready.',
+      position: 'top',
+      duration: 1500,
+      progress: true,
+    });
+    await delay(1600);
+
+    // ===== 11. ACTION BUTTON =====
+    toast.show({
+      type: 'success',
+      title: 'Item deleted',
+      position: 'bottom',
+      duration: 1500,
+      action: { label: 'Undo' },
     });
 
     await delay(2500);
@@ -142,7 +200,7 @@ export default function ToastUltimateDemoScreen() {
         activeOpacity={0.85}
       >
         {isRunning ? (
-          <ActivityIndicator color="#FFFFFF" style={{ marginRight: 8 }} />
+          <ActivityIndicator color="#FFFFFF" style={styles.spinner} />
         ) : (
           <Text style={styles.icon}>▶️</Text>
         )}
@@ -188,12 +246,8 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     letterSpacing: 0.5,
   },
-  hintText: {
-    marginTop: 32,
-    color: '#9CA3AF',
-    fontSize: 14,
-    textAlign: 'center',
-    lineHeight: 20,
+  spinner: {
+    marginRight: 8,
   },
   emoji: {
     fontSize: 22,

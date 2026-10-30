@@ -1,18 +1,24 @@
 # react-native-toast-message-library
 
-Lightweight, customizable toast notifications for React Native. Works on **Android** and **iOS**.
+**Toast notifications for React Native (Android and iOS).** A lightweight, customizable toast, snackbar and in-app notification library written in pure JavaScript. No native modules, no linking, no required dependencies.
 
+[![npm version](https://img.shields.io/npm/v/react-native-toast-message-library.svg)](https://www.npmjs.com/package/react-native-toast-message-library)
+[![npm downloads](https://img.shields.io/npm/dm/react-native-toast-message-library.svg)](https://www.npmjs.com/package/react-native-toast-message-library)
+[![types](https://img.shields.io/npm/types/react-native-toast-message-library.svg)](#typescript)
 [![platforms](https://img.shields.io/badge/platforms-Android%20%7C%20iOS-brightgreen)](#platform-support)
 [![license](https://img.shields.io/badge/license-MIT-blue)](#license)
 
-- Pure JavaScript: no native modules, no linking, no required dependencies.
-- Built on the `Animated` API, with a FIFO queue, themes, action buttons, swipe-to-dismiss and accessibility support.
+`react-native-toast-message-library` is a React Native toast notification library built on the `Animated` API. It gives you success, error, warning and info toasts with a FIFO queue, themes (light, dark, system), action buttons (for example "Undo"), swipe-to-dismiss, safe-area support, TypeScript types and screen reader accessibility.
+
+- Pure JavaScript: no native modules, no linking, no pods, no Gradle changes.
+- Works with React Native CLI and Expo (no custom native code needed).
+- Seven toast positions, per-toast and global configuration.
 - TypeScript declarations included.
 
 <p align="center">
   <img
     src="https://raw.githubusercontent.com/DenishDabhi/toast-message-library/main/demo/toast-video-letest.gif"
-    alt="react-native-toast-message-library demo"
+    alt="React Native toast notification demo: success, error, warning and info toasts on Android and iOS"
     width="650"
   />
 </p>
@@ -21,31 +27,47 @@ Lightweight, customizable toast notifications for React Native. Works on **Andro
 
 ## Table of contents
 
-1. [Features](#features)
-2. [Platform support](#platform-support)
-3. [Installation](#installation)
-4. [Quick start](#quick-start)
-5. [Showing toasts](#showing-toasts)
-6. [Title and description](#title-and-description)
-7. [Positions: top, bottom and more](#positions-top-bottom-and-more)
-8. [Safe-area insets and offsets](#safe-area-insets-and-offsets)
-9. [Options reference (per toast)](#options-reference-per-toast)
-10. [Provider props reference](#provider-props-reference)
-11. [Callbacks](#callbacks)
-12. [Queue behaviour](#queue-behaviour)
-13. [Themes](#themes)
-14. [Custom icons and content](#custom-icons-and-content)
-15. [Action buttons](#action-buttons)
-16. [Animations and reduced motion](#animations-and-reduced-motion)
-17. [Accessibility](#accessibility)
-18. [TypeScript](#typescript)
-19. [Recipes (copy and paste examples)](#recipes-copy-and-paste-examples)
-20. [Troubleshooting](#troubleshooting)
-21. [Limitations](#limitations)
-22. [Development](#development)
-23. [Contributing](#contributing) · [License](#license)
+1. [Why this React Native toast library](#why-this-react-native-toast-library)
+2. [Features](#features)
+3. [Platform support](#platform-support)
+4. [Installation](#installation)
+5. [Quick start](#quick-start)
+6. [Showing toasts](#showing-toasts)
+7. [Title and description](#title-and-description)
+8. [Positions: top, bottom and more](#positions-top-bottom-and-more)
+9. [Safe-area insets and offsets](#safe-area-insets-and-offsets)
+10. [Options reference (per toast)](#options-reference-per-toast)
+11. [Provider props reference](#provider-props-reference)
+12. [Callbacks](#callbacks)
+13. [Queue behaviour](#queue-behaviour)
+14. [Themes (light, dark, system)](#themes)
+15. [Custom icons and content](#custom-icons-and-content)
+16. [Action buttons (Undo, Retry)](#action-buttons)
+17. [Animations and reduced motion](#animations-and-reduced-motion)
+18. [Accessibility](#accessibility)
+19. [TypeScript](#typescript)
+20. [Recipes (copy and paste examples)](#recipes-copy-and-paste-examples)
+21. [FAQ](#faq)
+22. [Troubleshooting](#troubleshooting)
+23. [Limitations](#limitations)
+24. [Development](#development)
+25. [Contributing](#contributing) · [License](#license)
 
 ---
+
+## Why this React Native toast library
+
+| You want                        | What you get                                                               |
+| ------------------------------- | -------------------------------------------------------------------------- |
+| Zero native setup               | Pure JavaScript. Install and use. Works in Expo without ejecting.          |
+| Smooth animations               | `opacity` and `transform` only, so the native driver is used.              |
+| Predictable behaviour           | FIFO queue with `maxVisible`, update toasts in place by `id`.              |
+| Good defaults, easy customizing | Light, dark and system themes, `createTheme()`, per-toast style overrides. |
+| Accessible by default           | Alert roles, labels, Android live region, throttled iOS announcements.     |
+| Type-safe code                  | Full TypeScript declarations shipped with the package.                     |
+| Use it outside React components | Opt-in global `Toast` API for API clients, interceptors and middleware.    |
+
+Typical use cases: form validation messages, API success and error feedback, "Item deleted, Undo" snackbars, upload progress, offline banners, copy-to-clipboard confirmations, and in-app notifications.
 
 ## Features
 
@@ -84,6 +106,13 @@ npm install react-native-toast-message-library
 
 # optional but recommended: exact safe-area insets (notch, status bar, home indicator)
 npm install react-native-safe-area-context
+```
+
+With Yarn or pnpm:
+
+```sh
+yarn add react-native-toast-message-library
+pnpm add react-native-toast-message-library
 ```
 
 ## Quick start
@@ -202,11 +231,11 @@ toast.error('Could not reach the server.', { title: '' });
 toast.info({ title: 'Sync finished' });
 ```
 
-A toast must show something. A toast with an empty title **and** an empty description (and no `render`) throws a `TypeError`.
+A toast must show something. If the resolved title is empty **and** there is no description (and no `render` function), a `TypeError` is thrown. Typed toasts (`success`, `error`, `warning`, `info`) have a default title, so `toast.error('Failed')` is valid, but `toast.error({ title: '' })` without a description throws.
 
 ### Change the default title of every toast of a type
 
-Use the `titles` prop on the provider. This is also the way to translate the default titles.
+Use the `titles` prop on the provider. This is also the way to translate (localize) the default titles.
 
 ```jsx
 <ToastProvider
@@ -296,7 +325,7 @@ How toasts stack:
 
 - Toasts that share a position stack in the order they were shown (oldest first, newest last). The gap between them is `spacing` (provider prop, default `10`).
 - At most `maxVisible` toasts are on screen in total; the rest wait in the [queue](#queue-behaviour).
-- Toasts are at most **480 dp** wide and always keep a **16 dp** margin from the screen sides.
+- Toasts are at most **480 dp** wide (corner positions at most **340 dp**) and always keep a **16 dp** margin from the screen sides.
 - Each position is its own stack, so a `top` toast and a `bottom` toast can be visible at the same time.
 
 ---
@@ -466,6 +495,8 @@ Defaults set on the provider apply to every toast that does not override them. C
 
 ## Themes
 
+Built-in light, dark and system (follows the device) themes, plus full customization.
+
 ```jsx
 import { ToastProvider, createTheme } from 'react-native-toast-message-library';
 
@@ -507,6 +538,8 @@ toast.show({
 
 ## Action buttons
 
+Add an action such as "Undo" or "Retry" to any toast.
+
 ```jsx
 toast.show({
   type: 'success',
@@ -532,7 +565,7 @@ All animations animate only `opacity` and `transform`, so they use the native dr
 
 ## TypeScript
 
-Declarations ship in `types/index.d.ts`.
+Declarations ship in `types/index.d.ts`. No `@types` package is needed.
 
 ```ts
 import {
@@ -556,7 +589,7 @@ Exported types include `ToastOptions`, `ToastApi`, `ToastProviderProps`, `ToastT
 
 ## Recipes (copy and paste examples)
 
-### 1. Result of an API call
+### 1. Show the result of an API call
 
 ```js
 async function save() {
@@ -599,7 +632,7 @@ try {
 }
 ```
 
-### 3. Undo
+### 3. Undo snackbar
 
 ```js
 toast.show({
@@ -628,10 +661,10 @@ axios.interceptors.response.use(undefined, error => {
 });
 ```
 
-### 5. Translate or remove all default titles
+### 5. Translate or remove all default titles (localization)
 
 ```jsx
-<ToastProvider titles={{ success: 'સફળ', error: 'ભૂલ', warning: 'ચેતવણી', info: 'માહિતી' }} />
+<ToastProvider titles={{ success: 'Éxito', error: 'Error', warning: 'Advertencia', info: 'Información' }} />
 <ToastProvider titles={{ success: '', error: '', warning: '', info: '' }} />  {/* no titles */}
 ```
 
@@ -654,7 +687,7 @@ toast.error('The server is not reachable.', {
   closeButton: true,
   action: { label: 'Retry' },
   dismissOnAction: false,
-  onAction: ({ hide }) => retry().then(hide),
+  onAction: ({ hide }) => retry().then(hide).catch(() => {}),
 });
 ```
 
@@ -673,11 +706,63 @@ toast.show({
 });
 ```
 
-### 9. Theme follows the device
+### 9. Dark mode that follows the device
 
 ```jsx
 <ToastProvider theme="system">…</ToastProvider>
 ```
+
+---
+
+## FAQ
+
+**How do I show a toast in React Native?**
+Wrap your app in `ToastProvider`, call `useToast()` in any child component and use `toast.success()`, `toast.error()`, `toast.warning()`, `toast.info()` or `toast.show()`.
+
+**Does it work with Expo?**
+Yes. The library is pure JavaScript with no native modules, so it works in Expo (including Expo Go) and in React Native CLI projects.
+
+**Does it need native linking or pods?**
+No. There is no native code, so there is no linking, no `pod install` step for this library and no Gradle changes.
+
+**Can I show a toast outside a React component?**
+Yes. Add the `global` prop to `ToastProvider` and import `Toast` to call `Toast.error('...')` from services, API clients and interceptors.
+
+**How do I show a toast at the bottom of the screen?**
+Pass `position: 'bottom'` per toast, or set `position="bottom"` on `ToastProvider`. Seven positions are available.
+
+**How do I add an Undo button (snackbar)?**
+Use the `action` option with `onAction`, and `onDismiss(reason)` to detect a timeout. See [Action buttons](#action-buttons).
+
+**How do I keep a toast on screen until the user closes it?**
+Use `duration: 0` and `closeButton: true`.
+
+**How do I update an existing toast, for example loading to success?**
+Call `toast.show()` again with the same `id`. See [Change the text of a toast that is already visible](#change-the-text-of-a-toast-that-is-already-visible).
+
+**Does it support dark mode?**
+Yes. Use `theme="dark"`, `theme="light"` or `theme="system"`.
+
+**Does it support TypeScript?**
+Yes. Declarations are included in the package.
+
+**How do I use this library in Jest tests?**
+The package ships its source as ES modules, and the React Native Jest preset does not transform `node_modules/react-native-*` packages other than `react-native` itself. Add the library to `transformIgnorePatterns` in your Jest config:
+
+```js
+// jest.config.js
+module.exports = {
+  preset: 'react-native',
+  transformIgnorePatterns: [
+    'node_modules/(?!((jest-)?react-native|@react-native(-community)?|react-native-toast-message-library)/)',
+  ],
+};
+```
+
+Without this, Jest fails with `SyntaxError: Unexpected token 'export'`. Your app is not affected, because Metro transforms the library.
+
+**Why does my toast appear behind a Modal?**
+Toasts render inside the React tree, so they appear under React Native `Modal`s. Render another `ToastProvider` inside the modal. See [Limitations](#limitations).
 
 ---
 
@@ -696,6 +781,7 @@ toast.show({
 | Bottom toast hidden by the keyboard                           | Use `offsetY` or show it at `top`.                                                     |
 | Nothing vibrates with `haptics`                               | Android needs `<uses-permission android:name="android.permission.VIBRATE" />`.         |
 | Layout broken because of the wrapper View                     | Pass `style` to the provider.                                                          |
+| Jest: `SyntaxError: Unexpected token 'export'`                | Add the library to `transformIgnorePatterns`, see [the FAQ](#faq).                     |
 
 ## Limitations
 
@@ -727,7 +813,7 @@ Layout: `src/` (the library: `manager` = queue + timers, `components`, `animatio
 
 ## Contributing
 
-See [CONTRIBUTING.md](CONTRIBUTING.md).
+Issues and pull requests are welcome. See [CONTRIBUTING.md](CONTRIBUTING.md). If this library helps you, please give it a ⭐ on [GitHub](https://github.com/DenishDabhi/toast-message-library).
 
 ## License
 

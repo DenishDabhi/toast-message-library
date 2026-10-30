@@ -6,6 +6,7 @@ import createToastApi from '../manager/createToastApi';
 import ToastManager from '../manager/ToastManager';
 import { resolveTheme } from '../themes';
 import { DEFAULT_CONFIG } from '../utils/constants';
+import validateProviderProps from '../utils/validateProviderProps';
 import ToastContainer from './ToastContainer';
 
 const NO_OFFSET = { x: 0, y: 0 };
@@ -22,12 +23,31 @@ export default function ToastProvider({
   swipeToDismiss = DEFAULT_CONFIG.swipeToDismiss,
   progress = DEFAULT_CONFIG.progress,
   haptics = DEFAULT_CONFIG.haptics,
+  titles,
   spacing,
   offset,
   insets,
   global = false,
   style,
 }) {
+  // Fail loudly on invalid props instead of rendering toasts that never appear.
+  validateProviderProps({
+    position,
+    duration,
+    animation,
+    animationDuration,
+    maxVisible,
+    closeButton,
+    swipeToDismiss,
+    progress,
+    haptics,
+    titles,
+    spacing,
+    offset,
+    insets,
+    global,
+  });
+
   const config = {
     position,
     duration,
@@ -38,7 +58,12 @@ export default function ToastProvider({
     swipeToDismiss,
     progress,
     haptics,
+    titles,
   };
+
+  // Inline `titles={{ ... }}` objects change identity on every render, so the
+  // effect below depends on their content instead.
+  const titlesKey = titles ? JSON.stringify(titles) : '';
 
   const managerRef = useRef(null);
   if (!managerRef.current) {
@@ -60,6 +85,7 @@ export default function ToastProvider({
     swipeToDismiss,
     progress,
     haptics,
+    titlesKey,
   ]);
 
   // Clear every timer on unmount. `revive` makes this safe under React

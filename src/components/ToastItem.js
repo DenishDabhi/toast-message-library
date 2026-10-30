@@ -16,6 +16,7 @@ import {
   runToastAnimation,
 } from '../animations/toastAnimations';
 import { TYPE_LABELS } from '../utils/constants';
+import safeCall from '../utils/safeCall';
 import ToastAction from './ToastAction';
 import ToastIcon from './ToastIcon';
 import ToastProgress from './ToastProgress';
@@ -45,7 +46,7 @@ function vibrate() {
 }
 
 function ToastItem({ entry, manager, theme, reducedMotion, announce, width }) {
-  const { options, status, paused, remaining } = entry;
+  const { options, status, paused, remaining, revision } = entry;
   const { id, type, position } = options;
   const { width: windowWidth } = useWindowDimensions();
 
@@ -70,8 +71,10 @@ function ToastItem({ entry, manager, theme, reducedMotion, announce, width }) {
   const typography = theme.typography;
   const fontFamily = typography.fontFamily;
 
-  const title = options.title === undefined ? TYPE_LABELS[type] : options.title;
-  const showTitle = title !== null && title !== '' && title !== undefined;
+  // The manager always resolves the title to a string ('' means "no title"):
+  // per-toast title > provider `titles[type]` > built-in type name.
+  const title = options.title;
+  const showTitle = title !== '';
   const label =
     options.accessibilityLabel ||
     [
@@ -90,6 +93,9 @@ function ToastItem({ entry, manager, theme, reducedMotion, announce, width }) {
   useEffect(() => {
     let handle = null;
     if (status === 'visible') {
+      // A toast that was swiped away and then shown again with the same id
+      // keeps this component instance, so bring it back from off screen.
+      swipeX.setValue(0);
       handle = runToastAnimation(progress, 1, animationRef.current);
     } else {
       handle = runToastAnimation(progress, 0, animationRef.current, result => {
@@ -103,18 +109,23 @@ function ToastItem({ entry, manager, theme, reducedMotion, announce, width }) {
         handle.stop();
       }
     };
-  }, [status, id, manager, progress]);
+  }, [status, id, manager, progress, swipeX]);
 
-  // Mount-only side effects: haptics and iOS announcement.
+  // Haptics run once, when the toast first appears.
   useEffect(() => {
     if (options.haptics) {
-      vibrate(type);
-    }
-    if (Platform.OS === 'ios' && label) {
-      announce(label);
+      vibrate();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // iOS has no live regions: announce the toast when it appears and again when
+  // it is updated in place with new text.
+  useEffect(() => {
+    if (Platform.OS === 'ios' && label) {
+      announce(label);
+    }
+  }, [label, announce]);
 
   const info = { id, type, hide: () => manager.hide(id) };
   const actionFired = useRef(false);
@@ -126,9 +137,7 @@ function ToastItem({ entry, manager, theme, reducedMotion, announce, width }) {
     if (live.current.status !== 'visible') {
       return;
     }
-    if (live.current.options.onPress) {
-      live.current.options.onPress(info);
-    }
+    safeCall(live.current.options.onPress, info);
     if (live.current.options.dismissOnPress) {
       manager.hide(id, 'press');
     }
@@ -142,9 +151,7 @@ function ToastItem({ entry, manager, theme, reducedMotion, announce, width }) {
     if (current.options.dismissOnAction) {
       actionFired.current = true;
     }
-    if (current.options.onAction) {
-      current.options.onAction(info);
-    }
+    safeCall(current.options.onAction, info);
     if (current.options.dismissOnAction) {
       manager.hide(id, 'action');
     }
@@ -196,6 +203,7 @@ function ToastItem({ entry, manager, theme, reducedMotion, announce, width }) {
   );
   const padding = options.padding != null ? options.padding : theme.padding;
 
+  const animatedStyle = getAnimatedStyle(animation, progress, position);
   const outerStyle = [
     styles.container,
     {
@@ -209,13 +217,8 @@ function ToastItem({ entry, manager, theme, reducedMotion, announce, width }) {
           : theme.borderRadius,
     },
     buildShadow(theme, options.shadow),
-    getAnimatedStyle(animation, progress, position),
-    {
-      transform: [
-        ...(getAnimatedStyle(animation, progress, position).transform || []),
-        { translateX: swipeX },
-      ],
-    },
+    animatedStyle,
+    { transform: [...(animatedStyle.transform || []), { translateX: swipeX }] },
     options.containerStyle,
   ];
 
@@ -325,6 +328,7 @@ function ToastItem({ entry, manager, theme, reducedMotion, announce, width }) {
         </View>
         {options.progress && options.duration > 0 ? (
           <ToastProgress
+            key={revision}
             duration={options.duration}
             remaining={remaining}
             paused={paused || status !== 'visible'}
