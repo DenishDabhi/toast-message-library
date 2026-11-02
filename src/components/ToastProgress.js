@@ -1,13 +1,6 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Animated, Easing, StyleSheet, View } from 'react-native';
 
-/**
- * Bar that drains from full to empty over the toast's duration.
- * It pauses while `paused` is true and continues from where it stopped.
- *
- * Trade-off: the bar animates `width`, a layout property, so it cannot use the
- * native driver. It is a thin absolutely-positioned element, so the cost is small.
- */
 export default function ToastProgress({
   duration,
   remaining,
@@ -15,6 +8,7 @@ export default function ToastProgress({
   color,
   trackColor,
 }) {
+  const [width, setWidth] = useState(0);
   const value = useRef(new Animated.Value(remaining / duration)).current;
   const current = useRef(remaining / duration);
 
@@ -33,7 +27,7 @@ export default function ToastProgress({
       toValue: 0,
       duration: current.current * duration,
       easing: Easing.linear,
-      useNativeDriver: false,
+      useNativeDriver: true,
     });
     animation.start();
     return () => animation.stop();
@@ -44,26 +38,43 @@ export default function ToastProgress({
       testID="toast-progress"
       accessible={false}
       importantForAccessibility="no-hide-descendants"
+      onLayout={e => setWidth(e.nativeEvent.layout.width)}
       style={[styles.track, { backgroundColor: trackColor }]}
     >
-      <Animated.View
-        style={[
-          styles.bar,
-          {
-            backgroundColor: color,
-            width: value.interpolate({
-              inputRange: [0, 1],
-              outputRange: ['0%', '100%'],
-              extrapolate: 'clamp',
-            }),
-          },
-        ]}
-      />
+      {width > 0 && (
+        <Animated.View
+          style={[
+            styles.bar,
+            {
+              backgroundColor: color,
+              width,
+              transform: [
+                {
+                  translateX: value.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [-width, 0],
+                    extrapolate: 'clamp',
+                  }),
+                },
+              ],
+            },
+          ]}
+        />
+      )}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  track: { position: 'absolute', left: 0, right: 0, bottom: 0, height: 3 },
-  bar: { height: 3 },
+  track: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    bottom: 0,
+    height: 3,
+    overflow: 'hidden',
+  },
+  bar: {
+    height: 3,
+  },
 });
