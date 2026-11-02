@@ -4,18 +4,21 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses
 [Semantic Versioning](https://semver.org/).
 
-## [1.0.6] - 2026-11-02
+## [1.0.6] - 2026-11-03
 
 ### Changed
 
 - Added a Babel build process to compile JSX into standard JavaScript before publishing.
-- Updated package entry points (main, react-native and exports) to use the compiled dist directory.
+- Updated package entry points (main, react-native, and exports) to use the compiled dist/ directory.
 - Updated the npm package configuration to include compiled distribution files.
 - Added a build script and integrated the build process into package validation and publishing.
+- Updated package scripts to ensure the build runs before publishing.
+- Improved package compatibility with tools that analyze published JavaScript bundles.
 
 ### Fixed
 
-Fixed Bundlephobia parsing errors caused by JSX syntax in the published source entry point.
+- Fixed Bundlephobia parsing errors caused by JSX syntax in the published source entry point.
+- Fixed package entry point resolution by using precompiled JavaScript files.
 
 ## [1.0.5] - 2026-11-02
 
