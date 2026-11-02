@@ -4,7 +4,17 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses
 [Semantic Versioning](https://semver.org/).
 
-## [1.0.4] - 2026-10-29
+## [1.0.5] - 2026-11-02
+
+### Fixed
+
+- Fixed progress bar issues in toast messages so the bar now displays and animates correctly.
+
+### Changed
+
+- package.json: removed unnecessary keywords from the `keywords` list.
+
+## [1.0.4] - 2026-10-30
 
 This release makes the published package match its documentation. Several
 features listed under 1.0.0 (`description`, `titles`, provider prop validation,
