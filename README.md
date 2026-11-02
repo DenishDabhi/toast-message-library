@@ -11,6 +11,7 @@
 `react-native-toast-message-library` is a React Native toast notification library built on the `Animated` API. It gives you success, error, warning and info toasts with a FIFO queue, themes (light, dark, system), action buttons (for example "Undo"), swipe-to-dismiss, safe-area support, TypeScript types and screen reader accessibility.
 
 - Pure JavaScript: no native modules, no linking, no pods, no Gradle changes.
+- Ships precompiled JavaScript (`dist/`), so no extra Babel or Jest transform setup is needed in your app.
 - Works with React Native CLI and Expo (no custom native code needed).
 - Seven toast positions, per-toast and global configuration.
 - TypeScript declarations included.
@@ -84,6 +85,7 @@ Typical use cases: form validation messages, API success and error feedback, "It
 - Light / dark / system themes, `createTheme()`, per-toast style overrides, custom icons and fully custom content
 - Accessibility roles and labels, Android live region, throttled iOS announcements
 - Optional vibration feedback (`haptics`)
+- Precompiled `dist/` build (plain JavaScript, no JSX in the published entry point)
 
 ## Platform support
 
@@ -687,7 +689,10 @@ toast.error('The server is not reachable.', {
   closeButton: true,
   action: { label: 'Retry' },
   dismissOnAction: false,
-  onAction: ({ hide }) => retry().then(hide).catch(() => {}),
+  onAction: ({ hide }) =>
+    retry()
+      .then(hide)
+      .catch(() => {}),
 });
 ```
 
@@ -747,19 +752,22 @@ Yes. Use `theme="dark"`, `theme="light"` or `theme="system"`.
 Yes. Declarations are included in the package.
 
 **How do I use this library in Jest tests?**
-The package ships its source as ES modules, and the React Native Jest preset does not transform `node_modules/react-native-*` packages other than `react-native` itself. Add the library to `transformIgnorePatterns` in your Jest config:
+No special configuration is needed. The package ships compiled JavaScript in `dist/` (the `main`, `react-native` and `exports` entries all point to it), so Jest can load it like any other dependency.
 
 ```js
 // jest.config.js
 module.exports = {
   preset: 'react-native',
-  transformIgnorePatterns: [
-    'node_modules/(?!((jest-)?react-native|@react-native(-community)?|react-native-toast-message-library)/)',
-  ],
 };
 ```
 
-Without this, Jest fails with `SyntaxError: Unexpected token 'export'`. Your app is not affected, because Metro transforms the library.
+If you still see `SyntaxError: Unexpected token 'export'`, make sure you are on version 1.0.6 or newer. Older versions published uncompiled source and needed the library added to `transformIgnorePatterns`:
+
+```js
+transformIgnorePatterns: [
+  'node_modules/(?!((jest-)?react-native|@react-native(-community)?|react-native-toast-message-library)/)',
+],
+```
 
 **Why does my toast appear behind a Modal?**
 Toasts render inside the React tree, so they appear under React Native `Modal`s. Render another `ToastProvider` inside the modal. See [Limitations](#limitations).
@@ -768,20 +776,20 @@ Toasts render inside the React tree, so they appear under React Native `Modal`s.
 
 ## Troubleshooting
 
-| Symptom                                                       | Cause / fix                                                                            |
-| ------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
-| `useToast() was called outside of a <ToastProvider>`          | Render the component below the provider (usually in `App.js`).                         |
-| `Toast.* was called but no <ToastProvider global> is mounted` | Add the `global` prop, or use `useToast()`.                                            |
-| `Invalid position "…"` or another `TypeError`                 | Fix the option or prop; the message lists the allowed values.                          |
-| `the toast would be empty`                                    | Give the toast a `message`/`description`, a non-empty `title` or a `render` function.  |
-| `use either "message" or "description"`                       | Pass only one of them.                                                                 |
-| Toast hidden behind a modal / native screen                   | See [Limitations](#limitations).                                                       |
-| Toast under the notch / status bar                            | Install `react-native-safe-area-context` and use `SafeAreaProvider`, or pass `insets`. |
-| Toast too close to the header or tab bar                      | Use `offset={{ y }}` on the provider or `offsetY` on the toast.                        |
-| Bottom toast hidden by the keyboard                           | Use `offsetY` or show it at `top`.                                                     |
-| Nothing vibrates with `haptics`                               | Android needs `<uses-permission android:name="android.permission.VIBRATE" />`.         |
-| Layout broken because of the wrapper View                     | Pass `style` to the provider.                                                          |
-| Jest: `SyntaxError: Unexpected token 'export'`                | Add the library to `transformIgnorePatterns`, see [the FAQ](#faq).                     |
+| Symptom                                                       | Cause / fix                                                                                                                         |
+| ------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| `useToast() was called outside of a <ToastProvider>`          | Render the component below the provider (usually in `App.js`).                                                                      |
+| `Toast.* was called but no <ToastProvider global> is mounted` | Add the `global` prop, or use `useToast()`.                                                                                         |
+| `Invalid position "…"` or another `TypeError`                 | Fix the option or prop; the message lists the allowed values.                                                                       |
+| `the toast would be empty`                                    | Give the toast a `message`/`description`, a non-empty `title` or a `render` function.                                               |
+| `use either "message" or "description"`                       | Pass only one of them.                                                                                                              |
+| Toast hidden behind a modal / native screen                   | See [Limitations](#limitations).                                                                                                    |
+| Toast under the notch / status bar                            | Install `react-native-safe-area-context` and use `SafeAreaProvider`, or pass `insets`.                                              |
+| Toast too close to the header or tab bar                      | Use `offset={{ y }}` on the provider or `offsetY` on the toast.                                                                     |
+| Bottom toast hidden by the keyboard                           | Use `offsetY` or show it at `top`.                                                                                                  |
+| Nothing vibrates with `haptics`                               | Android needs `<uses-permission android:name="android.permission.VIBRATE" />`.                                                      |
+| Layout broken because of the wrapper View                     | Pass `style` to the provider.                                                                                                       |
+| Jest: `SyntaxError: Unexpected token 'export'`                | Upgrade to latest version or newer (compiled `dist/`). On older versions, add the library to `transformIgnorePatterns`, see [the FAQ](#faq). |
 
 ## Limitations
 
@@ -796,20 +804,56 @@ Toasts render inside the React tree, so they appear under React Native `Modal`s.
 
 ## Development
 
-The repository root is both the library and a React Native CLI demo app (no Expo). Node.js 22.11 or newer is needed for the demo app's toolchain (React Native 0.88); the published library itself has no Node requirement.
+The repository root is both the library and a React Native CLI demo app.
+Node.js 22.11 or newer is required for the demo app's development toolchain.
 
-```sh
+### Install Dependencies
+
+```bash
 npm install
-npm test               # Jest
-npm run lint
-npm run typecheck
-
-npm start              # Metro (terminal 1)
-npm run android        # terminal 2; needs Android SDK + JDK
-npm run ios            # macOS + Xcode; cd ios && bundle exec pod install first
 ```
 
-Layout: `src/` (the library: `manager` = queue + timers, `components`, `animations`, `themes`, `utils`), `types/` (TypeScript declarations), `__tests__/`, and `App.js` + `demo/` (the demo app).
+### Build the Library
+
+```bash
+npm run build
+```
+
+This command compiles the source files from `src/` into the `dist/` directory using Babel (JSX is converted to plain JavaScript). The published package entry points (`main`, `react-native` and `exports`) use `dist/`, so run `npm run build` before publishing. The `prepublishOnly` script does this automatically.
+
+### Run Checks
+
+```bash
+npm run lint
+npm run typecheck
+npm test
+```
+
+### Validate the Package
+
+```bash
+npm run validate
+```
+
+This runs the build, lint, type checking, tests, and npm package dry-run validation.
+
+You can also check the files that will be included in the npm package:
+
+```bash
+npm pack --dry-run
+```
+
+### Run the Demo App
+
+```bash
+npm start
+npm run android
+npm run ios
+```
+
+The demo app imports the library directly from `src/`, so source changes can be tested without rebuilding `dist/`.
+
+Before publishing, make sure the compiled `dist/` directory is generated correctly and included in the npm package.
 
 ## Contributing
 
