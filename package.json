@@ -1,7 +1,7 @@
 {
   "name": "react-native-toast-message-library",
   "version": "1.0.6",
-  "description": "React Native toast notification library for Android and iOS: toast, snackbar, queue, light and dark themes, action buttons, swipe-to-dismiss, TypeScript and accessibility. Pure JavaScript, no native modules, works with Expo.",
+  "description": "An independent, customizable toast notification toolkit for React Native. Supports Android, iOS and Expo with queued notifications, snackbar layouts, action buttons, swipe-to-dismiss, themes and TypeScript. Lightweight JavaScript implementation with no custom native modules.",
   "main": "dist/index.js",
   "react-native": "dist/index.js",
   "types": "types/index.d.ts",
