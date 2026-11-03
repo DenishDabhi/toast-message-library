@@ -1,0 +1,1 @@
+Object.defineProperty(exports,"__esModule",{value:true});exports.default=safeCall;function safeCall(fn,...args){if(typeof fn!=='function'){return;}try{fn(...args);}catch(error){console.error('[react-native-toast-message-library] Error in toast callback:',error);}}
