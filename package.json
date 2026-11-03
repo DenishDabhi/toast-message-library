@@ -1,21 +1,22 @@
 {
   "name": "react-native-toast-message-library",
-  "version": "1.0.5",
-  "description": "React Native toast notification library for Android and iOS: toast, snackbar, queue, light and dark themes, action buttons, swipe-to-dismiss, TypeScript and accessibility. Pure JavaScript, no native modules, works with Expo.",
-  "main": "src/index.js",
-  "react-native": "src/index.js",
+  "version": "1.0.6",
+  "description": "An independent, customizable toast notification toolkit for React Native. Supports Android, iOS and Expo with queued notifications, snackbar layouts, action buttons, swipe-to-dismiss, themes and TypeScript. Lightweight JavaScript implementation with no custom native modules.",
+  "main": "dist/index.js",
+  "react-native": "dist/index.js",
   "types": "types/index.d.ts",
   "exports": {
     ".": {
       "types": "./types/index.d.ts",
-      "react-native": "./src/index.js",
-      "default": "./src/index.js"
+      "react-native": "./dist/index.js",
+      "default": "./dist/index.js"
     },
     "./package.json": "./package.json"
   },
   "sideEffects": false,
   "files": [
     "src",
+    "dist",
     "types/index.d.ts",
     "README.md",
     "CHANGELOG.md",
@@ -25,33 +26,27 @@
     "android": "react-native run-android",
     "ios": "react-native run-ios",
     "start": "react-native start",
+    "build": "babel src --out-dir dist --extensions .js,.jsx",
     "test": "jest",
     "test:coverage": "jest --coverage",
     "lint": "eslint src demo __tests__ App.js index.js --ext .js",
     "typecheck": "tsc --noEmit -p types/tsconfig.json",
-    "validate": "npm run lint && npm run typecheck && npm test && npm pack --dry-run",
-    "prepublishOnly": "npm run lint && npm run typecheck && npm test"
+    "validate": "npm run build && npm run lint && npm run typecheck && npm test && npm pack --dry-run",
+    "prepublishOnly": "npm run build && npm run lint && npm run typecheck && npm test"
   },
   "keywords": [
     "react-native",
     "react-native-toast",
-    "react-native-toast-notification",
     "react-native-snackbar",
     "react-native-notification",
     "react-native-toast-message-library",
     "toast",
     "toast-message",
     "toast-notification",
-    "toast-notifications",
     "toaster",
     "snackbar",
     "notification",
-    "alert",
-    "ios",
-    "android",
-    "expo",
-    "typescript",
-    "animated"
+    "alert"
   ],
   "license": "MIT",
   "author": "Denish Dabhi <dabhidenish57@gmail.com>",
@@ -77,6 +72,7 @@
     }
   },
   "devDependencies": {
+    "@babel/cli": "^8.0.6",
     "@babel/core": "^7.25.2",
     "@babel/preset-env": "^7.25.3",
     "@babel/runtime": "^7.25.0",

@@ -1,0 +1,1 @@
+Object.defineProperty(exports,"__esModule",{value:true});exports.default=generateToastId;var counter=0;function generateToastId(){counter+=1;return`toast-${counter}`;}

@@ -3,7 +3,11 @@
 =======
 # react-native-toast-message-library
 
-**Toast notifications for React Native (Android and iOS).** A lightweight, customizable toast, snackbar and in-app notification library written in pure JavaScript. No native modules, no linking, no required dependencies.
+**Toast notifications for React Native (Android and iOS).**
+
+A lightweight, customizable toast, snackbar, and in-app notification library built with JavaScript.
+
+Requires `react-native-safe-area-context` for safe-area handling. No custom native modules or manual linking are required.
 
 [![npm version](https://img.shields.io/npm/v/react-native-toast-message-library.svg)](https://www.npmjs.com/package/react-native-toast-message-library)
 [![npm downloads](https://img.shields.io/npm/dm/react-native-toast-message-library.svg)](https://www.npmjs.com/package/react-native-toast-message-library)
@@ -13,10 +17,9 @@
 
 `react-native-toast-message-library` is a React Native toast notification library built on the `Animated` API. It gives you success, error, warning and info toasts with a FIFO queue, themes (light, dark, system), action buttons (for example "Undo"), swipe-to-dismiss, safe-area support, TypeScript types and screen reader accessibility.
 
-- Pure JavaScript: no native modules, no linking, no pods, no Gradle changes.
-- Works with React Native CLI and Expo (no custom native code needed).
-- Seven toast positions, per-toast and global configuration.
-- TypeScript declarations included.
+- Built-in safe-area handling powered by `react-native-safe-area-context`.
+- Supports Android and iOS.
+- Ships precompiled JavaScript (`dist/`), so additional Babel or Jest transformation setup is usually not required specifically for this library.
 
 <p align="center">
   <img
@@ -87,6 +90,7 @@ Typical use cases: form validation messages, API success and error feedback, "It
 - Light / dark / system themes, `createTheme()`, per-toast style overrides, custom icons and fully custom content
 - Accessibility roles and labels, Android live region, throttled iOS announcements
 - Optional vibration feedback (`haptics`)
+- Precompiled `dist/` build (plain JavaScript, no JSX in the published entry point)
 
 ## Platform support
 
@@ -95,32 +99,40 @@ Typical use cases: form validation messages, API success and error feedback, "It
 | **Android** | ✅        | Tested |
 | **iOS**     | ✅        | Tested |
 
-| Requirement  | Version                          |
-| ------------ | -------------------------------- |
-| React Native | `>= 0.72` (tested with `0.88.0`) |
-| React        | `>= 18` (tested with `19.3.0`)   |
+| Requirement                    | Version                          |
+| ------------------------------ | -------------------------------- |
+| React Native                   | `>= 0.72` (tested with `0.88.0`) |
+| React                          | `>= 18` (tested with `19.3.0`)   |
+| react-native-safe-area-context | `>= 4.0.0`                       |
 
-No native code is involved, so there are no pods, no linking and no Gradle changes.
+No custom native code is involved. The required `react-native-safe-area-context` dependency handles safe-area insets.
 
 ## Installation
 
-```sh
-npm install react-native-toast-message-library
+Install the library and its required dependencies:
 
-# optional but recommended: exact safe-area insets (notch, status bar, home indicator)
-npm install react-native-safe-area-context
+```sh
+npm install react-native-toast-message-library react-native-safe-area-context
 ```
 
 With Yarn or pnpm:
 
 ```sh
-yarn add react-native-toast-message-library
-pnpm add react-native-toast-message-library
+yarn add react-native-toast-message-library react-native-safe-area-context
+pnpm add react-native-toast-message-library react-native-safe-area-context
 ```
+
+For iOS, install CocoaPods dependencies:
+
+```sh
+cd ios && pod install
+```
+
+**Important:** `react-native-safe-area-context` is required. Make sure it is installed and that your application is wrapped with `SafeAreaProvider`.
 
 ## Quick start
 
-**Step 1 – wrap your app once, near the root.** If you use `react-native-safe-area-context`, put `SafeAreaProvider` outside `ToastProvider`.
+**Step 1 – wrap your app once, near the root.** `SafeAreaProvider` is required and must be placed outside `ToastProvider`.
 
 ```jsx
 // App.js
@@ -172,11 +184,17 @@ The provider renders its children followed by the toast overlay inside a wrapper
 ```js
 const toast = useToast();
 
-toast.show(options | 'message');   // -> id
-toast.success(message, options);   // -> id   (also: error / warning / info)
-toast.hide(id);                    // -> boolean (true if a visible or queued toast was dismissed)
-toast.hideAll();                   // -> number of toasts dismissed
-toast.isVisible(id?);              // -> boolean (without an id: is any toast visible?)
+toast.show(options); // Show a toast using an options object
+toast.show('Hello'); // Show a toast using a message
+
+toast.success('Saved');
+toast.error('Something went wrong');
+toast.warning('Please check');
+toast.info('New update available');
+
+toast.hide(id);
+toast.hideAll();
+toast.isVisible(id);
 ```
 
 - `success`, `error`, `warning` and `info` accept a string, a number **or** an options object as the first argument. The type is always forced to the method's type.
@@ -356,31 +374,35 @@ Notes: `center` toasts ignore `offsetY` and `offset.y`. For centred positions (`
 
 ### Where do the insets come from?
 
-In this order:
+Insets are obtained in this order:
 
 1. The `insets` prop of `ToastProvider` (any side you pass wins; sides you leave out are taken from the next source).
-2. `react-native-safe-area-context`, if it is installed **and** your app is wrapped in `SafeAreaProvider`. This is exact and recommended.
-3. A built-in fallback: Android `top` = status-bar height, `bottom` = 0; iOS `top` = 47, `bottom` = 34 (conservative notch values).
+2. `react-native-safe-area-context`, using the insets provided by `SafeAreaProvider`.
+
+**Important:** `react-native-safe-area-context` is required, and your app must be wrapped in `SafeAreaProvider` to provide safe-area values automatically.
 
 ### Examples
 
-**Recommended: let safe-area-context do it.** Nothing else is needed.
+**Recommended: let safe-area-context do it.** Nothing else is needed beyond the required provider setup.
 
 ```jsx
+import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { ToastProvider } from 'react-native-toast-message-library';
+
 <SafeAreaProvider>
   <ToastProvider>
     <App />
   </ToastProvider>
-</SafeAreaProvider>
+</SafeAreaProvider>;
 ```
 
-**Set the insets yourself** (no safe-area library):
+**Override the insets yourself** when you need custom values:
 
 ```jsx
 <ToastProvider insets={{ top: 44, bottom: 34 }}>
 ```
 
-Only one side is fine; the other sides use the automatic value:
+Only one side is fine; the remaining sides use the automatically detected safe-area values:
 
 ```jsx
 <ToastProvider insets={{ bottom: 24 }}>
@@ -674,11 +696,13 @@ axios.interceptors.response.use(undefined, error => {
 ### 6. Bottom toasts that avoid the home indicator and a tab bar
 
 ```jsx
+import { SafeAreaProvider } from 'react-native-safe-area-context';
+
 <SafeAreaProvider>
   <ToastProvider position="bottom" offset={{ y: 56 }}>
     …
   </ToastProvider>
-</SafeAreaProvider>
+</SafeAreaProvider>;
 ```
 
 ### 7. Persistent error with a close button and a retry action
@@ -690,7 +714,10 @@ toast.error('The server is not reachable.', {
   closeButton: true,
   action: { label: 'Retry' },
   dismissOnAction: false,
-  onAction: ({ hide }) => retry().then(hide).catch(() => {}),
+  onAction: ({ hide }) =>
+    retry()
+      .then(hide)
+      .catch(() => {}),
 });
 ```
 
@@ -720,76 +747,80 @@ toast.show({
 ## FAQ
 
 **How do I show a toast in React Native?**
-Wrap your app in `ToastProvider`, call `useToast()` in any child component and use `toast.success()`, `toast.error()`, `toast.warning()`, `toast.info()` or `toast.show()`.
+
+Wrap your app in `SafeAreaProvider` and `ToastProvider`, call `useToast()` in any child component and use `toast.success()`, `toast.error()`, `toast.warning()`, `toast.info()` or `toast.show()`.
 
 **Does it work with Expo?**
-Yes. The library is pure JavaScript with no native modules, so it works in Expo (including Expo Go) and in React Native CLI projects.
+
+Yes. The library is pure JavaScript with no custom native modules, so it works in Expo (including Expo Go) and in React Native CLI projects. Install the required `react-native-safe-area-context` dependency as well.
 
 **Does it need native linking or pods?**
-No. There is no native code, so there is no linking, no `pod install` step for this library and no Gradle changes.
+
+The library does not contain custom native code, so no manual linking or Gradle changes are required. However, install the required `react-native-safe-area-context` dependency and follow its installation instructions for your project.
 
 **Can I show a toast outside a React component?**
+
 Yes. Add the `global` prop to `ToastProvider` and import `Toast` to call `Toast.error('...')` from services, API clients and interceptors.
 
 **How do I show a toast at the bottom of the screen?**
+
 Pass `position: 'bottom'` per toast, or set `position="bottom"` on `ToastProvider`. Seven positions are available.
 
 **How do I add an Undo button (snackbar)?**
+
 Use the `action` option with `onAction`, and `onDismiss(reason)` to detect a timeout. See [Action buttons](#action-buttons).
 
 **How do I keep a toast on screen until the user closes it?**
+
 Use `duration: 0` and `closeButton: true`.
 
 **How do I update an existing toast, for example loading to success?**
+
 Call `toast.show()` again with the same `id`. See [Change the text of a toast that is already visible](#change-the-text-of-a-toast-that-is-already-visible).
 
 **Does it support dark mode?**
+
 Yes. Use `theme="dark"`, `theme="light"` or `theme="system"`.
 
 **Does it support TypeScript?**
+
 Yes. Declarations are included in the package.
 
 **How do I use this library in Jest tests?**
-The package ships its source as ES modules, and the React Native Jest preset does not transform `node_modules/react-native-*` packages other than `react-native` itself. Add the library to `transformIgnorePatterns` in your Jest config:
 
-```js
-// jest.config.js
-module.exports = {
-  preset: 'react-native',
-  transformIgnorePatterns: [
-    'node_modules/(?!((jest-)?react-native|@react-native(-community)?|react-native-toast-message-library)/)',
-  ],
-};
-```
+The library ships precompiled JavaScript files in the `dist/` directory. Its package entry points reference the compiled output, so additional Babel transformation configuration is usually not required specifically for this library.
 
-Without this, Jest fails with `SyntaxError: Unexpected token 'export'`. Your app is not affected, because Metro transforms the library.
+Use your React Native project's existing Jest configuration.
+
+If you encounter a transformation error, update to version `1.0.6` or later and check your Jest preset and package configuration.
 
 **Why does my toast appear behind a Modal?**
+
 Toasts render inside the React tree, so they appear under React Native `Modal`s. Render another `ToastProvider` inside the modal. See [Limitations](#limitations).
 
 ---
 
 ## Troubleshooting
 
-| Symptom                                                       | Cause / fix                                                                            |
-| ------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
-| `useToast() was called outside of a <ToastProvider>`          | Render the component below the provider (usually in `App.js`).                         |
-| `Toast.* was called but no <ToastProvider global> is mounted` | Add the `global` prop, or use `useToast()`.                                            |
-| `Invalid position "…"` or another `TypeError`                 | Fix the option or prop; the message lists the allowed values.                          |
-| `the toast would be empty`                                    | Give the toast a `message`/`description`, a non-empty `title` or a `render` function.  |
-| `use either "message" or "description"`                       | Pass only one of them.                                                                 |
-| Toast hidden behind a modal / native screen                   | See [Limitations](#limitations).                                                       |
-| Toast under the notch / status bar                            | Install `react-native-safe-area-context` and use `SafeAreaProvider`, or pass `insets`. |
-| Toast too close to the header or tab bar                      | Use `offset={{ y }}` on the provider or `offsetY` on the toast.                        |
-| Bottom toast hidden by the keyboard                           | Use `offsetY` or show it at `top`.                                                     |
-| Nothing vibrates with `haptics`                               | Android needs `<uses-permission android:name="android.permission.VIBRATE" />`.         |
-| Layout broken because of the wrapper View                     | Pass `style` to the provider.                                                          |
-| Jest: `SyntaxError: Unexpected token 'export'`                | Add the library to `transformIgnorePatterns`, see [the FAQ](#faq).                     |
+| Symptom                                                       | Cause / fix                                                                                      |
+| ------------------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
+| `useToast() was called outside of a <ToastProvider>`          | Render the component below the provider (usually in `App.js`).                                   |
+| `Toast.* was called but no <ToastProvider global> is mounted` | Add the `global` prop, or use `useToast()`.                                                      |
+| `Invalid position "…"` or another `TypeError`                 | Fix the option or prop; the message lists the allowed values.                                    |
+| `the toast would be empty`                                    | Give the toast a `message`/`description`, a non-empty `title` or a `render` function.            |
+| `use either "message" or "description"`                       | Pass only one of them.                                                                           |
+| Toast hidden behind a modal / native screen                   | See [Limitations](#limitations).                                                                 |
+| Toast under the notch / status bar                            | Make sure `react-native-safe-area-context` is installed and wrap your app in `SafeAreaProvider`. |
+| Toast too close to the header or tab bar                      | Use `offset={{ y }}` on the provider or `offsetY` on the toast.                                  |
+| Bottom toast hidden by the keyboard                           | Use `offsetY` or show it at `top`.                                                               |
+| Nothing vibrates with `haptics`                               | Android needs `<uses-permission android:name="android.permission.VIBRATE" />`.                   |
+| Layout broken because of the wrapper View                     | Pass `style` to the provider.                                                                    |
+| Jest transformation error                                     | Use version 1.0.6 or newer and check your Jest preset and compiled `dist/` output.               |
 
 ## Limitations
 
 - Toasts render inside the React tree. They appear **under** React Native `Modal`s and native-presented screens (for example native-stack modal presentations). Render another `ToastProvider` inside such a modal.
-- The fallback insets (used without `react-native-safe-area-context`) are approximations. Install the library for exact values.
+- `react-native-safe-area-context` is required for safe-area handling. Wrap your app in `SafeAreaProvider` to provide the detected insets.
 - The keyboard is not tracked automatically (see the offsets section).
 - `center` toasts ignore `offsetY`.
 - `haptics` uses the built-in `Vibration` API: Android honours short vibrations (needs the `VIBRATE` permission), iOS ignores the duration and vibrates for a fixed ~0.4 s. It is not a Taptic Engine integration.
@@ -799,20 +830,56 @@ Toasts render inside the React tree, so they appear under React Native `Modal`s.
 
 ## Development
 
-The repository root is both the library and a React Native CLI demo app (no Expo). Node.js 22.11 or newer is needed for the demo app's toolchain (React Native 0.88); the published library itself has no Node requirement.
+The repository root is both the library and a React Native CLI demo app.
+Node.js 22.11 or newer is required for the demo app's development toolchain.
 
-```sh
+### Install Dependencies
+
+```bash
 npm install
-npm test               # Jest
-npm run lint
-npm run typecheck
-
-npm start              # Metro (terminal 1)
-npm run android        # terminal 2; needs Android SDK + JDK
-npm run ios            # macOS + Xcode; cd ios && bundle exec pod install first
 ```
 
-Layout: `src/` (the library: `manager` = queue + timers, `components`, `animations`, `themes`, `utils`), `types/` (TypeScript declarations), `__tests__/`, and `App.js` + `demo/` (the demo app).
+### Build the Library
+
+```bash
+npm run build
+```
+
+This command compiles the source files from `src/` into the `dist/` directory using Babel (JSX is converted to plain JavaScript). The published package entry points (`main`, `react-native` and `exports`) use `dist/`, so run `npm run build` before publishing. The `prepublishOnly` script does this automatically.
+
+### Run Checks
+
+```bash
+npm run lint
+npm run typecheck
+npm test
+```
+
+### Validate the Package
+
+```bash
+npm run validate
+```
+
+This runs the build, lint, type checking, tests, and npm package dry-run validation.
+
+You can also check the files that will be included in the npm package:
+
+```bash
+npm pack --dry-run
+```
+
+### Run the Demo App
+
+```bash
+npm start
+npm run android
+npm run ios
+```
+
+The demo app imports the library directly from `src/`, so source changes can be tested without rebuilding `dist/`.
+
+Before publishing, make sure the compiled `dist/` directory is generated correctly and included in the npm package.
 
 ## Contributing
 
